@@ -125,6 +125,7 @@ You can tweak the generated parser with several options:
   result of running the parser against this input
 - `-T`, `--test-file <filename>` - Test the parser with the contents of the
   given file, outputting the result of running the parser against this input
+- `--source-map` — generate a source map file with an optionally specified name
 - `--trace` — makes the parser trace its progress
 - `-v`, `--version` - output the version number
 - `-h`, `--help` - display help for command

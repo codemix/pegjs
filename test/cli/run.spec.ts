@@ -121,6 +121,11 @@ Options:
                                    without this option)
   --plugin <module>                Comma-separated list of plugins. (can be
                                    specified multiple times)
+  -m, --source-map [mapfile]       Generate a source map if format is "source".
+                                   Do nothing if format "parser". If name is
+                                   not specified, the source map will be named
+                                   "<input_file>.map" if input is a file and
+                                   "source.map" if input is a standard input
   -t, --test <text>                Test the parser with the given text,
                                    outputting the result of running the parser
                                    instead of the parser itself
@@ -381,6 +386,92 @@ Options:
       args: ["--trace"],
       stdin: "foo = '1'",
     })).resolves.toMatch("DefaultTracer: peg$DefaultTracer");
+  });
+
+  describe("handles source map", () => {
+    it("with default name without --output", async() => {
+      const sourceMap = path.resolve(__dirname, "source.map");
+
+      expect(() => {
+        // Make sure the file isn't there before we start
+        fs.statSync(sourceMap);
+      }).toThrow();
+
+      await expect(exec({
+        args: ["--source-map"],
+        stdin: "foo = '1'",
+      })).resolves.toBeDefined();
+      expect(fs.statSync(sourceMap)).toBeInstanceOf(fs.Stats);
+      fs.unlinkSync(sourceMap);
+
+      await expect(exec({
+        args: ["-m"],
+        stdin: "foo = '1'",
+      })).resolves.toBeDefined();
+      expect(fs.statSync(sourceMap)).toBeInstanceOf(fs.Stats);
+      fs.unlinkSync(sourceMap);
+    });
+
+    it("with default name with --output", async() => {
+      const FILENAME = "output-with-default-map.js";
+      const testOutput = path.resolve(__dirname, FILENAME);
+      const sourceMap = path.resolve(__dirname, `${FILENAME}.map`);
+
+      expect(() => {
+        // Make sure the file isn't there before we start
+        fs.statSync(testOutput);
+      }).toThrow();
+      expect(() => {
+        // Make sure the file isn't there before we start
+        fs.statSync(sourceMap);
+      }).toThrow();
+
+      await expect(exec({
+        args: ["--source-map", "--output", testOutput],
+        stdin: "foo = '1'",
+      })).resolves.toBe("");
+      expect(fs.statSync(testOutput)).toBeInstanceOf(fs.Stats);
+      expect(fs.statSync(sourceMap)).toBeInstanceOf(fs.Stats);
+      fs.unlinkSync(testOutput);
+      fs.unlinkSync(sourceMap);
+
+      await expect(exec({
+        args: ["-m", "--output", testOutput],
+        stdin: "foo = '1'",
+      })).resolves.toBe("");
+      expect(fs.statSync(testOutput)).toBeInstanceOf(fs.Stats);
+      expect(fs.statSync(sourceMap)).toBeInstanceOf(fs.Stats);
+      fs.unlinkSync(testOutput);
+      fs.unlinkSync(sourceMap);
+    });
+
+    it("with specified name", async() => {
+      const sourceMap = path.resolve(__dirname, "specified-name.map");
+
+      expect(() => {
+        // Make sure the file isn't there before we start
+        fs.statSync(sourceMap);
+      }).toThrow();
+
+      await expect(exec({
+        args: ["--source-map", sourceMap],
+        stdin: "foo = '1'",
+      })).resolves.toBeDefined();
+      expect(fs.statSync(sourceMap)).toBeInstanceOf(fs.Stats);
+      fs.unlinkSync(sourceMap);
+
+      expect(() => {
+        // Make sure the file isn't there before we start
+        fs.statSync(sourceMap);
+      }).toThrow();
+
+      await expect(exec({
+        args: ["-m", sourceMap],
+        stdin: "foo = '1'",
+      })).resolves.toBeDefined();
+      expect(fs.statSync(sourceMap)).toBeInstanceOf(fs.Stats);
+      fs.unlinkSync(sourceMap);
+    });
   });
 
   it("uses dash-dash", async() => {

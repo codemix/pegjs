@@ -127,6 +127,10 @@ const cliOptions = program
     commaArg
   )
   .option(
+    "-m, --source-map [mapfile]",
+    "Generate a source map if format is \"source\". Do nothing if format \"parser\". If name is not specified, the source map will be named \"<input_file>.map\" if input is a file and \"source.map\" if input is a standard input"
+  )
+  .option(
     "-t, --test <text>",
     "Test the parser with the given text, outputting the result of running the parser instead of the parser itself"
   )
@@ -154,6 +158,7 @@ const cliOptions = program
   .parse()
   .opts();
 
+// Default values for peggy
 const PARSER_DEFAULTS = {
   allowedStartRules: [],
   cache: false,
@@ -163,12 +168,15 @@ const PARSER_DEFAULTS = {
   format: "commonjs",
   plugin: [],
   plugins: [], // Might be set in extraOptions
+  sourceMap: false,
   trace: false,
 };
 
+// Default values for CLI arguments
 const PROG_DEFAULTS = {
   input: undefined,
   output: undefined,
+  sourceMap: undefined,
   test: undefined,
   testFile: undefined,
   verbose: false,
@@ -292,6 +300,15 @@ if (progOptions.test && progOptions.testFile) {
   abort("The -t/--test and -T/--test-file options are mutually exclusive.");
 }
 
+// If CLI parameter was defined, enable source map generation
+if (progOptions.sourceMap !== undefined) {
+  options.sourceMap = true;
+}
+// If source map name is not specified, calculate it
+if (progOptions.sourceMap === true) {
+  progOptions.sourceMap = outputFile === "-" ? "source.map" : outputFile + ".map";
+}
+
 let testText = null;
 let testGrammarSource = null;
 let testFile = null;
@@ -358,6 +375,21 @@ readStream(inputStream, input => {
     outputStream.on("error", () => {
       abort(`Can't write to file "${outputFile}".`);
     });
+  }
+
+  if (options.sourceMap) {
+    source = source.toStringWithSourceMap({
+      file: outputFile === "-" ? null : outputFile,
+    });
+
+    const sourceMapStream = fs.createWriteStream(progOptions.sourceMap);
+    sourceMapStream.on("error", () => {
+      abort(`Can't write to file "${progOptions.sourceMap}".`);
+    });
+    sourceMapStream.write(source.map.toString());
+    sourceMapStream.end();
+
+    source = source.code;
   }
 
   if (outputStream) {
