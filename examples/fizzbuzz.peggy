@@ -33,8 +33,9 @@ line
   / buzz
 
 fizzbuzz = f:fizz _ b:buzz { return f + b }
-fizz = @"fizz"i !{ return currentNumber % 3 }
-buzz = @"buzz"i !{ return currentNumber % 5 }
+\u0066izz 'fizz' = @"fizz"i !{ return currentNumber % 3 }
+// That's U+1F41D: HONEYBEE
+\u{62}uzz 'buzz' = @("buzz"i / "\u{1F41D}") !{ return currentNumber % 5 }
 
 // Arbitrary requirement needing &
 number "number without trailing comment"
@@ -42,3 +43,5 @@ number "number without trailing comment"
   / n:$[0-9]+ &"\n" { return parseInt(n, 10) }
 
 _ = $[ \t]*
+
+extr𐳀 = "Test non-BMP identifiers"
