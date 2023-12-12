@@ -16,6 +16,7 @@ Released: TBD
 
 ### Minor Changes
 
+- [#454](https://github.com/peggyjs/peggy/pull/454) Fix a bug with named NEVER_MATCH expressions
 - [#453](https://github.com/peggyjs/peggy/pull/453) Make generate-bytecode.js ts-clean
 - [#452](https://github.com/peggyjs/peggy/pull/452) Fixes to prepare generate-bytecode.js for ts-check
 - [#432](https://github.com/peggyjs/peggy/pull/432) Add peggy.code-workspace
