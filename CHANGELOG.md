@@ -9,6 +9,7 @@ Unreleased
 ### Breaking changes
 
 ### New features
+ - [#501](https://github.com/peggyjs/peggy/issues/501) Implement soft-mode for generated parsers with access to partial results on syntax errors.
 
 ### Bug fixes
 
